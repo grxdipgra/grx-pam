@@ -1,9 +1,7 @@
-#include <QCoreApplication>
 #include <QFile>
+#include <QDir>
 #include <QTextStream>
 #include "simplecrypt.h"
-#include <QDir>
-#include <QDebug>
 int main(int argc, char *argv[])
 {
     QString nombre,nombre_cifrado;
