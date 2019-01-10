@@ -3,32 +3,33 @@
 #include <QTextStream>
 #include "simplecrypt.h"
 #include <QDir>
+#include <QDebug>
 int main(int argc, char *argv[])
 {
-    QCoreApplication a(argc, argv);
     QString nombre,nombre_cifrado;
     QString clave,clave_cifrado;
-    QString fichero=QDir::homePath()+"/.grx/.proxy";
-
-    if (argc > 2)
-    {
-        if (!QDir(QDir::homePath()+"/.grx").exists()){
-            QDir().mkdir(QDir::homePath()+"/.grx");
+    QString servicio = "";
+    servicio = qgetenv("PAM_SERVICE");
+    if (servicio == "sddm"){
+        QTextStream qtin(stdin);
+        clave = qtin.readLine();
+        clave.chop(1);
+        nombre = qgetenv("PAM_USER");
+        QString fichero="/home/"+nombre+"/.grx/.proxy";
+        if (!QDir("/home/"+nombre+"/.grx").exists()){
+            QDir().mkdir("/home/"+nombre+"/.grx");
         }
-
         SimpleCrypt *cifra = new SimpleCrypt(Q_UINT64_C(0x0c2ad4c2acb9f023));
-        nombre = a.arguments().at(1);
-        clave = a.arguments().at(2);
         nombre_cifrado = cifra->encryptToString(nombre);
         clave_cifrado = cifra->encryptToString(clave);
         QFile file(fichero);
         file.setPermissions(QFile::ReadOther | QFile::WriteOther);
         if (file.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
-               QTextStream out(&file);
-               out << nombre_cifrado << "\n";
-               out << clave_cifrado << "\n";
-               file.close();
-           }
+           QTextStream out(&file);
+           out << nombre_cifrado << "\n";
+           out << clave_cifrado << "\n";
+           file.close();
+        }
     }
 return 0;
 }
