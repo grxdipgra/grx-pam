@@ -1,0 +1,32 @@
+#!/bin/bash
+
+LOG=/var/log/grx-dbus-install.log
+
+# /usr/share/pam/common-aut
+# Hacemos una copia de seguridad del archivo common-auth y le insertamos la linea requerida
+
+archivo="/etc/pam.d/common-auth"
+archivo_mod="/etc/pam.d/common-auth.old"
+ComRes_tmp=$(
+if ! grep -qi "/usr/sbin/proxy.grx" $archivo; then
+	cp $archivo $archivo_mod
+	let nlinea=$(grep -in "pam_permit.so" $archivo | cut -d\: -f1)+1
+	sed -i $nlinea"i\auth    required        pam_exec.so expose_authtok /usr/sbin/proxy.grx" $archivo
+fi
+)
+if [ -z "$ComRes_tmp" ]; then
+	echo "El archivo $archivo se modifico correctamente." >> $LOG
+else 
+	echo "Puede visualizar más información en $LOG"
+	echo "$ComRes_tmp" >> $LOG
+fi
+
+## Reconfiguracion del servicio pam tras la modificacion de archivos
+ComRes_tmp=$(pam-auth-update --package * --force)
+if [ -z "$ComRes_tmp" ]; then
+	echo "Las politicas PAM se han configurado correctamente" >> $LOG
+else 
+	echo "Puede visualizar más información en $LOG"
+	echo "$ComRes_tmp" >>$LOG
+fi
+

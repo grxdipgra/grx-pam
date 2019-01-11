@@ -1,0 +1,7 @@
+#!/bin/bash
+
+archivo="/etc/pam.d/common-auth"
+archivo2="/usr/share/pam/common-auth"
+sed -i "/proxy.grx/d" $archivo
+sed -i "/proxy.grx/d" $archivo2
+
